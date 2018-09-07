@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html ng-app="myApp">
+
+<head>
+    <title>Trainee Management</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-route.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-resource.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="/libs/bootstrap-notify.min.js"></script>
+    <link href="/libs/css/bootstrap.min.css" rel="stylesheet"></link>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <link href="/libs/css/style.css" rel="stylesheet">
+</head>
+
+<body ng-controller="AppCtrl" data-ng-init="onload()">
+    <header>
+        <h1 align="center">Trainee Management</h1>
+    </header>
+    <hr/>
+    <div id="outer">
+        <div>
+            <div class="container">
+                <div class="col-md-4"></div>
+                <input class="col-md-4 searchField" id="idSearchInput" ng-model="searchQuery" placeholder="Search Trainee"></input>
+                <div class="col-md-12"></div>
+                <div class="col-md-4"></div>
+                <button ng-click="searchUser()" class="col-md-2 btn btn-danger buttonMargin">Search</button>
+                <button ng-click="addUser()" ng-style="{'display': isFound ? 'none' : 'block'}" class="col-md-2 btn btn-success buttonleftmargin">Add User</button>
+                <button ng-click="viewDetails()" ng-style="{'display': viewDetailsFlag ? 'block' : 'none'}" class="col-md-2 btn btn-info buttonleftmargin">View Details</button>
+            </div>
+            <div class="container col-md-6" ng-style="{'display': viewSearchDet ? 'block' : 'none'}">
+                <h2>Trainee Details</h2>
+                <hr/>
+                <form>
+                    <div class="form-group">
+                        <h4 class="bold">Name :</h4>
+                        <h4>{{currentSelection.username}}</h4>
+                    </div>
+                    <div class="form-group">
+                        <h4 class="bold">Mail :</h4>
+                        <h4>{{currentSelection.mail}}</h4>
+                    </div>
+                    <br/>
+                    <button type="button" data-target="#updateModal" data-toggle="modal" class="btn btn-primary">Update Score</button>
+                    <button type="button" class="btn btn-info" data-target="#viewModal" data-toggle="modal">View Scores</button>
+                    <button type="button" ng-click="loadCanvas()" class="btn btn-warning" data-target="#graphModal" data-toggle="modal" title="View performance Graph">
+                        <span class="glyphicon glyphicon-signal"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger" data-target="#deleteModal" data-toggle="modal" title="Delete Trainee">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="modal" tabindex="-1" id="updateModal" data-keyboard="false">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            &times;
+                        </button>
+                        <h4 class="modal-title" align="center">Update Details</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="inputUserName">Assignment Code</label>
+                                <select class="form-control" name="repeatSelect" id="repeatSelect" ng-model="assignmentCodes.model">
+                                    <option ng-repeat="assignment in assignmentCodes.availableAssignments" value="{{assignment.id}}">{{assignment.name}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>User Interface Score</label>
+                                <input class="form-control" placeholder="User Interface Score" ng-model="updateDetails.UIScore" />
+                            </div>
+                            <div class="form-group">
+                                <label>JavaScript Score</label>
+                                <input class="form-control" placeholder="JavaScript Score Score" ng-model="updateDetails.JSScore" />
+                            </div>
+                            <div class="form-group">
+                                <label>Logical Score</label>
+                                <input class="form-control" placeholder="Logical Score" ng-model="updateDetails.LogicScore" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" ng-click="sendUpdate()">Update</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" tabindex="-1" id="viewModal" data-keyboard="false" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            &times;
+                        </button>
+                        <h3 class="modal-title" align="center">
+                            <b>Scores</b>
+                        </h3>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table">
+                            <thead>
+                                <tr style="text-align: center; vertical-align: middle;">
+                                    <td>
+                                        <b>Assignment</b>
+                                    </td>
+                                    <td>
+                                        <b>User Interface</b>
+                                    </td>
+                                    <td>
+                                        <b>JavaScript</b>
+                                    </td>
+                                    <td>
+                                        <b>Logical</b>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="text-align: center; vertical-align: middle;" ng-repeat="score in scores">
+                                    <td>{{score.assignmentCode}}</td>
+                                    <td>{{score.UIScore}}</td>
+                                    <td>{{score.JSScore}}</td>
+                                    <td>{{score.LogicScore}}</td>
+                                    <td>
+                                        <button class="btn" ng-click="sendMail(score.assignmentCode, score.UIScore, score.JSScore, score.LogicScore)">
+                                            <span class="glyphicon glyphicon-envelope"></span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" tabindex="-1" id="graphModal" data-keyboard="false" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            &times;
+                        </button>
+                        <h4 align="center" class="modal-title">Performance Graph</h4>
+                    </div>
+                    <div class="modal-body">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" tabindex="-1" id="deleteModal" data-keyboard="false" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 align="center" class="modal-title">Delete Trainee ?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <h4>Do you really want to delete the {{currentSelection.username}}?</h4>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn" ng-click="deleteUser()" data-dismiss="modal">Yes</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/controller.js"></script>
+</body>
+
+</html>

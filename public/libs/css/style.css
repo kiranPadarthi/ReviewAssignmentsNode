@@ -1,0 +1,22 @@
+body{
+    background-color: #d8dcdc;
+}
+h1{
+    color: #3426b0;
+}
+.searchField{
+    text-align: center;
+    height: 50px;
+    font-size: 150%;
+    -webkit-appearance: none;
+}
+.buttonMargin{
+    margin-top: 2%;
+}
+.buttonleftmargin{
+    margin-top: 2%;
+    margin-left: 1%;
+}
+.bold{
+    font-weight: bold;
+}
